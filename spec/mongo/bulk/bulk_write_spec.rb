@@ -59,13 +59,13 @@ describe Mongo::BulkWrite do
     let(:options) do
        { ordered: true }
     end
-     
+
     it_behaves_like 'a bulk write object'
-    
+
     context 'when the batch requires splitting' do
-    
+
       context 'when the operations are the same type' do
-    
+
         let(:error) do
           begin
             bulk.execute
@@ -73,7 +73,7 @@ describe Mongo::BulkWrite do
             ex
           end
         end
-    
+
         let(:operations) do
           [].tap do |ops|
             3000.times do |i|
@@ -83,7 +83,7 @@ describe Mongo::BulkWrite do
             ops << { insert_one: { _id: 3001 } }
           end
         end
-    
+
         it 'raises a BulkWriteError' do
           expect(error).to be_a(Mongo::Error::BulkWriteError)
         end
@@ -134,7 +134,7 @@ describe Mongo::BulkWrite do
             ex
           end
         end
-    
+
         let(:operations) do
           [].tap do |ops|
             6.times do |i|
@@ -144,11 +144,11 @@ describe Mongo::BulkWrite do
             ops << { insert_one: { _id: 100 } }
           end
         end
-    
+
         it 'raises a BulkWriteError error' do
           expect(error).to be_a(Mongo::Error::BulkWriteError)
         end
-    
+
         it 'splits messages into multiple messages' do
           error
           expect(authorized_collection.find.count).to eq(6)

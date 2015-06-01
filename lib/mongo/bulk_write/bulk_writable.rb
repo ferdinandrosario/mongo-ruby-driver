@@ -76,9 +76,10 @@ module Mongo
       def execute
         server = next_primary
         validate_operations!
+        operation_id = Monitoring.next_operation_id
         merged_ops.each do |op|
           validate_type!(op.keys.first)
-          execute_op(op, server)
+          execute_op(op, server, operation_id)
         end
         finalize
       end
@@ -121,14 +122,14 @@ module Mongo
         ]
       end
 
-      def execute_op(operation, server)
+      def execute_op(operation, server, operation_id)
         ops = max_write_batches(operation, server)
 
         until ops.empty?
           op = ops.shift
           type = op.keys.first
           begin
-            process(send(type, op, server), op[:indexes])
+            process(send(type, op, server, operation_id), op[:indexes])
           rescue Error::MaxBSONSize, Error::MaxMessageSize => ex
             raise ex if op[type].size < 2
             ops = split(op, type) + ops
